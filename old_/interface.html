@@ -1,0 +1,60 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <title>Document</title>
+</head>
+
+<style>
+  .slider {
+    width: 100%;
+  }
+</style>
+
+<body>
+  <h1>Steps</h1>
+  <p>1600 = 360</p>
+  <input type="number" id="stepsNr"></input>
+  <button onClick="doSteps(1,0,1,document.getElementById('stepsNr').value)">Motor 1</button>
+  <button onClick="doSteps(1,1,1,document.getElementById('stepsNr').value)">Motor 2</button>
+  <h1>Control Motor 1</h1>
+  <button onClick="spinMotor(document.getElementById('motor1_slider').value,0,0)">Forward</button>
+  <button onClick="spinMotor(document.getElementById('motor1_slider').value,0,1)">Backward</button>
+  <button onClick="stopMotor(0)">Stop</button>
+  <input type="range" min="1" max="1000" value="500" class="slider" oninput="changeSpeed(0, this.value)"
+    id="motor1_slider">
+
+  <h1>Control Motor 2</h1>
+  <button onClick="spinMotor(document.getElementById('motor2_slider').value,1,0)">Forward</button>
+  <button onClick="spinMotor(document.getElementById('motor2_slider').value,1,1)">Backward</button>
+  <button onClick="stopMotor(1)">Stop</button>
+  <input type="range" min="1" max="1000" value="500" class="slider" oninput="changeSpeed(1, this.value)"
+    id="motor2_slider">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+  <script>
+    const socket = io("http://192.168.2.111:8080");
+
+    function spinMotor(speed, motorNr, direction) {
+      socket.emit("SpinMotor", speed, motorNr, direction);
+    }
+
+    function doSteps(speed, motorNr, direction, steps) {
+      socket.emit("SpinMotorSteps", speed, motorNr, direction, steps);
+    }
+
+    function stopMotor(motorNr) {
+      socket.emit("StopMotor", motorNr);
+    }
+
+    function changeSpeed(motorNr, speed) {
+      console.log(speed)
+      socket.emit("ChangeSpeed", motorNr, speed);
+    }
+  </script>
+</body>
+
+</html>

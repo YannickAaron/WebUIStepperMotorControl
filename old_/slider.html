@@ -1,0 +1,96 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+
+    <!-- Jquery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.js"></script>
+
+    <!-- Dragdealer JS -->
+    <script src="src/dragdealer/src/dragdealer.js"></script>
+    <!-- Dragdealer CSS -->
+    <link href="src/dragdealer/src/dragdealer.css" rel="stylesheet" type="text/css">
+</head>
+
+<style>
+    .slider {
+        width: 100%;
+    }
+</style>
+
+<body>
+    <div id="just-a-slider" class="dragdealer">
+        <div class="handle red-bar">
+            <span class="value"></span>%
+        </div>
+    </div>
+    <h1>Steps</h1>
+    <p>1600 = 360</p>
+    <input type="number" id="stepsNr"></input>
+    <button onClick="doSteps(1,0,1,document.getElementById('stepsNr').value)">Motor 1</button>
+    <button onClick="doSteps(1,1,1,document.getElementById('stepsNr').value)">Motor 2</button>
+    <h1>Control Motor 1</h1>
+    <button onClick="spinMotor(document.getElementById('motor1_slider').value,0,0)">Forward</button>
+    <button onClick="spinMotor(document.getElementById('motor1_slider').value,0,1)">Backward</button>
+    <button onClick="stopMotor(0)">Stop</button>
+    <input type="range" min="1" max="1000" value="500" class="slider" oninput="changeSpeed(0, this.value)"
+        id="motor1_slider">
+
+    <h1>Control Motor 2</h1>
+    <button onClick="spinMotor(document.getElementById('motor2_slider').value,1,0)">Forward</button>
+    <button onClick="spinMotor(document.getElementById('motor2_slider').value,1,1)">Backward</button>
+    <button onClick="stopMotor(1)">Stop</button>
+    <input type="range" min="1" max="1000" value="500" class="slider" oninput="changeSpeed(1, this.value)"
+        id="motor2_slider">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script>
+        const socket = io("http://192.168.2.111:8080");
+
+        function spinMotor(speed, motorNr, direction) {
+            socket.emit("SpinMotor", speed, motorNr, direction);
+        }
+
+        function doSteps(speed, motorNr, direction, steps) {
+            socket.emit("SpinMotorSteps", speed, motorNr, direction, steps);
+        }
+
+        function stopMotor(motorNr) {
+            socket.emit("StopMotor", motorNr);
+        }
+
+        function changeSpeed(motorNr, speed) {
+            console.log(speed)
+            socket.emit("ChangeSpeed", motorNr, speed);
+        }
+    </script>
+    <script>
+        $(function () {
+            new Dragdealer('just-a-slider', {
+                x: 0.5,
+                steps: 100,
+                animationCallback: function (x, y) {
+                    var value = Math.round(x * 10) - 5
+                    if (value == 0) {
+                        $('#just-a-slider .value').text("HALT");
+                    } else if (value < 0) {
+                        $('#just-a-slider .value').text("LINKS");
+                    } else {
+                        $('#just-a-slider .value').text("RECHTS");
+                    }
+                    console.log(this.getValue());
+                },
+                callback: function (x, y) {
+                    this.setValue(0.5, 0);
+                }
+            });
+        })
+
+    </script>
+</body>
+
+</html>
